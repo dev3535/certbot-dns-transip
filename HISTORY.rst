@@ -3,6 +3,11 @@
 History
 -------
 
+1.5.0 (05-05-2021)
+---------------------
+
+* replaced transip package with python-transip for new TransIP API v6 REST support
+
 0.3.0 (24-03-2020)
 ---------------------
 

@@ -25,7 +25,7 @@ setup(
     long_description=readme + '\n\n' + history,
     author='''Wim Fournier''',
     author_email='''wim@fournier.nl''',
-    url='''https://github.com/hsmade/certbot_dns_transip''',
+    url='''https://github.com/dev3535/certbot_dns_transip''',
     packages=find_packages(where='.', exclude=('tests', 'hooks')),
     package_dir={'''certbot_dns_transip''':
                  '''certbot_dns_transip'''},
