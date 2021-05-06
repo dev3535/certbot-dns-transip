@@ -62,34 +62,6 @@ class Authenticator(dns_common.DNSAuthenticator):
             }
         )
 
-    def perform(self, achalls): # pylint: disable=missing-function-docstring
-        self._setup_credentials()
-
-        self._attempt_cleanup = True
-
-        responses = []
-        performs = []
-        self.logger.info("Using overridden perform from dns_transip for %s",
-            ", ".join(a.domain for a in achalls)
-        )
-        for achall in achalls:
-            domain = achall.domain
-            validation_domain_name = achall.validation_domain_name(domain)
-            validation = achall.validation(achall.account_key)
-
-            self._perform(domain, validation_domain_name, validation)
-            # performs.append(domain, validation_domain_name, validation)
-            responses.append(achall.response(achall.account_key))
-
-        # DNS updates take time to propagate and checking to see if the update has occurred is not
-        # reliable (the machine this code is running on might be able to see an update before
-        # the ACME server). So: we sleep for a short amount of time we believe to be long enough.
-        self.logger.info("Waiting %d seconds for DNS changes to propagate",
-                    self.conf('propagation-seconds'))
-        time.sleep(self.conf('propagation-seconds'))
-
-        return responses
-
     def _perform(self, domain, validation_name, validation):
         self.logger.debug('_perform: running adding txt record %s.%s', domain, validation_name)
         self._get_transip_client().add_txt_record(domain, validation_name, validation)
@@ -106,6 +78,8 @@ class Authenticator(dns_common.DNSAuthenticator):
     def _get_transip_client(self):
         username = self.credentials.conf('username')
         if username in self.clients:
+            # Use already initialized TransIP Client, this will help with rate limiting
+            # and prevent getting blocked by TransIP for too many auth requests.
             return self.clients[username]
 
         if not self.credentials.conf('key_file'):
@@ -129,7 +103,8 @@ class _TransipClient():
     def __init__(self, username, key_file, sleep_time=.5):
         self.sleep_time = sleep_time
         self.logger = LOGGER.getChild(self.__class__.__name__)
-        self.logger.debug('Creating Transip API client for user %s with sleep %s', username, sleep_time)
+        self.logger.debug('Creating Transip API client for user %s with sleep %s to prevent API bashing',
+            username, sleep_time)
         self.client = transip.TransIP(login=username, private_key_file=key_file)
 
     def add_txt_record(self, domain_name, record_name, record_content):
