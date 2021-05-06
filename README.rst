@@ -1,6 +1,6 @@
-===============================
-certbot-dns-transip
-===============================
+==================================================
+certbot-dns-transip (with TransIP v6 RESTfull api)
+==================================================
 
 .. image:: https://readthedocs.org/projects/certbot-dns-transip/badge/?version=stable
    :target: https://certbot-dns-transip.readthedocs.io/en/stable/?badge=stable
